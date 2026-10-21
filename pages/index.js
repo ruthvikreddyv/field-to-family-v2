@@ -68,7 +68,7 @@ export default function Home() {
   useEffect(() => {
     if (!CONFIG.sheetUrl) return;
     let cancelled = false;
-    fetch(CONFIG.sheetUrl, { method: "GET" })
+    fetch(CONFIG.sheetUrl + (CONFIG.sheetUrl.includes("?") ? "&" : "?") + "t=" + Date.now(), { method: "GET", cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (cancelled || !data || !Array.isArray(data.products)) return;
@@ -182,12 +182,17 @@ export default function Home() {
         website: "", // honeypot - must stay empty
       };
       try {
+        const body = JSON.stringify(payload);
+        // Two independent routes; the Sheet ignores the duplicate by order ID.
+        try {
+          if (navigator.sendBeacon) navigator.sendBeacon(CONFIG.sheetUrl, new Blob([body], { type: "text/plain;charset=UTF-8" }));
+        } catch (e) { /* fall through to fetch */ }
         fetch(CONFIG.sheetUrl, {
           method: "POST",
           mode: "no-cors",
           keepalive: true,
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
+          body,
         }).catch(() => {});
       } catch (e) { /* ordering via WhatsApp still works */ }
     }

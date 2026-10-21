@@ -1,14 +1,19 @@
 /**
  * Field to Family - Google Sheet backend (free).
- * Paste this whole file into Extensions > Apps Script, run setupSheets() once,
- * then Deploy > New deployment > Web app (Execute as: Me, Who has access: Anyone).
+ * 1) Change ADMIN_PASSWORD below.  2) Run setupSheets once.
+ * 3) Deploy > New deployment > Web app (Execute as: Me, Who has access: Anyone).
+ * After editing this file later: Deploy > Manage deployments > pencil > New version > Deploy.
  *
- * Products tab : you edit prices / availability here, the website updates by itself.
+ * Products tab : untick the box -> the vegetable disappears from the website.
  * Orders tab   : every order is added here automatically.
+ * Admin page   : https://YOUR-SITE/admin  (uses ADMIN_PASSWORD)
  */
 
-var PRODUCT_HEADERS = ["ID", "Active", "Available", "Category", "Name", "Telugu", "Hindi", "Price", "Unit", "Image URL"];
+var ADMIN_PASSWORD = "change-this-password";
+
+var PRODUCT_HEADERS = ["ID", "Show on website", "In stock", "Category", "Name", "Telugu", "Hindi", "Price", "Unit", "Image URL"];
 var ORDER_HEADERS = ["Time", "Order ID", "Name", "Phone", "Address", "Area", "Map link", "Slot", "Payment", "Items", "Total (Rs)", "Notes", "Status"];
+var STATUSES = ["New", "Confirmed", "Out for delivery", "Delivered", "Cancelled"];
 var MIN_ORDER = 150, FREE_ABOVE = 500, DELIVERY_FEE = 30;
 
 var SEED = [
@@ -284,8 +289,10 @@ var SEED = [
  }
 ];
 
+function ss_() { return SpreadsheetApp.getActiveSpreadsheet(); }
+
 function setupSheets() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = ss_();
   var p = ss.getSheetByName("Products") || ss.insertSheet("Products");
   if (p.getLastRow() < 2) {
     p.clear();
@@ -309,22 +316,27 @@ function setupSheets() {
 
 function truthy(v) { return v === true || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "yes"; }
 
-function readProducts_() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Products");
+/* every product row; show = both boxes ticked */
+function readAllProducts_() {
+  var sh = ss_().getSheetByName("Products");
   if (!sh || sh.getLastRow() < 2) return [];
   var v = sh.getRange(2, 1, sh.getLastRow() - 1, PRODUCT_HEADERS.length).getValues();
   var out = [];
   v.forEach(function (r) {
-    if (!r[0] || !truthy(r[1])) return;            // Active = false hides the item
-    var price = Number(r[7]);
-    if (!(price > 0)) return;
+    if (!r[0]) return;
     out.push({
-      id: String(r[0]).trim(), available: truthy(r[2]), category: String(r[3] || "Other"),
+      id: String(r[0]).trim(), show: truthy(r[1]) && truthy(r[2]), category: String(r[3] || "Other"),
       name: String(r[4]), te: String(r[5] || ""), hi: String(r[6] || ""),
-      price: price, unit: String(r[8] || "kg"), image: String(r[9] || "")
+      price: Number(r[7]) || 0, unit: String(r[8] || "kg"), image: String(r[9] || "")
     });
   });
   return out;
+}
+
+function readProducts_() {
+  return readAllProducts_().filter(function (p) { return p.show && p.price > 0; }).map(function (p) {
+    return { id: p.id, available: true, category: p.category, name: p.name, te: p.te, hi: p.hi, price: p.price, unit: p.unit, image: p.image };
+  });
 }
 
 function json_(obj) {
@@ -332,7 +344,7 @@ function json_(obj) {
 }
 
 function doGet() {
-  return json_({ products: readProducts_() });
+  return json_({ products: readProducts_(), t: new Date().getTime() });
 }
 
 function clean_(s, n) {
@@ -344,9 +356,20 @@ function clean_(s, n) {
 function stepFor_(unit) { return String(unit).toLowerCase() === "kg" ? 0.5 : 1; }
 
 function doPost(e) {
-  var lock = LockService.getScriptLock();
   try {
     var d = JSON.parse((e && e.postData && e.postData.contents) || "{}");
+    if (d.action) return admin_(d);
+    return order_(d);
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+}
+
+/* ---------------- customer order ---------------- */
+function order_(d) {
+  var lock = LockService.getScriptLock();
+  var locked = false;
+  try {
     if (d.website) return json_({ ok: true });      // honeypot: bots fill this
     var phone = String(d.phone || "").replace(/\D/g, "").slice(-10);
     if (!d.orderId || !/^[6-9]\d{9}$/.test(phone) || !d.items || !d.items.length || d.items.length > 60)
@@ -358,7 +381,7 @@ function doPost(e) {
     d.items.forEach(function (it) {
       var p = byId[String(it.id)];
       var q = Number(it.qty);
-      if (!p || !p.available || !(q > 0) || q > 99) return;
+      if (!p || !(q > 0) || q > 99) return;
       var st = stepFor_(p.unit);
       q = Math.round(q / st) * st;
       var lt = Math.round(p.price * q * 100) / 100;
@@ -368,13 +391,14 @@ function doPost(e) {
     if (!lines.length) return json_({ ok: false, error: "no valid items" });
     var total = sub + (sub >= FREE_ABOVE ? 0 : DELIVERY_FEE);
 
-    lock.waitLock(20000);
-    var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Orders");
-    if (!sh) { setupSheets(); sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Orders"); }
+    lock.waitLock(20000); locked = true;
+    var sh = ss_().getSheetByName("Orders");
+    if (!sh) { setupSheets(); sh = ss_().getSheetByName("Orders"); }
     var oid = clean_(d.orderId, 30);
     var last = sh.getLastRow();
     if (last > 1) {
-      var ids = sh.getRange(Math.max(2, last - 200), 2, Math.min(last - 1, 201), 1).getValues();
+      var from = Math.max(2, last - 200);
+      var ids = sh.getRange(from, 2, last - from + 1, 1).getValues();
       for (var i = 0; i < ids.length; i++) if (ids[i][0] === oid) return json_({ ok: true, dup: true });
     }
     sh.appendRow([
@@ -384,9 +408,88 @@ function doPost(e) {
       clean_(d.notes, 300), "New"
     ]);
     return json_({ ok: true, total: total });
+  } finally {
+    if (locked) { try { lock.releaseLock(); } catch (x) {} }
+  }
+}
+
+/* ---------------- admin ---------------- */
+function admin_(d) {
+  if (ADMIN_PASSWORD === "change-this-password" || String(ADMIN_PASSWORD).length < 6)
+    return json_({ ok: false, error: "Open Code.gs in Apps Script, change ADMIN_PASSWORD (6+ characters), then deploy a New version." });
+  if (String(d.pw) !== ADMIN_PASSWORD) { Utilities.sleep(1500); return json_({ ok: false, error: "Wrong password" }); }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    if (d.action === "saveProducts") saveProducts_(d.products || []);
+    else if (d.action === "deleteProduct") deleteProduct_(String(d.id || ""));
+    else if (d.action === "setStatus") setStatus_(String(d.orderId || ""), String(d.status || ""));
+    else if (d.action !== "list") return json_({ ok: false, error: "unknown action" });
+    return json_({ ok: true, products: readAllProducts_(), orders: readOrders_(), statuses: STATUSES });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   } finally {
     try { lock.releaseLock(); } catch (x) {}
+  }
+}
+
+function readOrders_() {
+  var sh = ss_().getSheetByName("Orders");
+  if (!sh || sh.getLastRow() < 2) return [];
+  var n = Math.min(300, sh.getLastRow() - 1);
+  var v = sh.getRange(sh.getLastRow() - n + 1, 1, n, ORDER_HEADERS.length).getValues();
+  return v.reverse().map(function (r) {
+    return {
+      time: r[0] instanceof Date ? r[0].toISOString() : String(r[0]), orderId: String(r[1]), name: String(r[2]),
+      phone: String(r[3]).replace(/\D/g, "").slice(-10), address: String(r[4]), area: String(r[5]), mapLink: String(r[6]),
+      slot: String(r[7]), payment: String(r[8]), items: String(r[9]), total: String(r[10]), notes: String(r[11]),
+      status: String(r[12] || "New")
+    };
+  });
+}
+
+function setStatus_(orderId, status) {
+  if (STATUSES.indexOf(status) < 0) throw new Error("bad status");
+  var sh = ss_().getSheetByName("Orders");
+  if (!sh || sh.getLastRow() < 2) throw new Error("no orders");
+  var ids = sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues();
+  for (var i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]) === orderId) { sh.getRange(i + 2, 13).setValue(status); return; }
+  }
+  throw new Error("order not found");
+}
+
+function saveProducts_(list) {
+  var sh = ss_().getSheetByName("Products");
+  if (list.length > 100) throw new Error("too many changes at once");
+  list.forEach(function (p) {
+    var id = clean_(p.id, 40).replace(/[^A-Za-z0-9_-]/g, "");
+    var price = Number(p.price);
+    var name = clean_(p.name, 80);
+    if (!id || !name || !(price > 0) || price > 100000) throw new Error("Check name and price for: " + (name || id));
+    var row = [id, !!p.show, !!p.show, clean_(p.category, 40) || "Other", name, clean_(p.te, 80), clean_(p.hi, 80),
+               Math.round(price * 100) / 100, clean_(p.unit, 12) || "kg", clean_(p.image, 400)];
+    var last = sh.getLastRow();
+    var ids = last > 1 ? sh.getRange(2, 1, last - 1, 1).getValues() : [];
+    var at = -1;
+    for (var i = 0; i < ids.length; i++) if (String(ids[i][0]).trim() === id) { at = i + 2; break; }
+    if (at < 0) {
+      at = last + 1;
+      sh.getRange(at, 1, 1, row.length).setValues([row]);
+      sh.getRange(at, 2, 1, 2).insertCheckboxes();
+    } else {
+      sh.getRange(at, 1, 1, row.length).setValues([row]);
+    }
+  });
+}
+
+function deleteProduct_(id) {
+  var sh = ss_().getSheetByName("Products");
+  var last = sh.getLastRow();
+  if (last < 2) return;
+  var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]).trim() === id) { sh.deleteRow(i + 2); return; }
   }
 }

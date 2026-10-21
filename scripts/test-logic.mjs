@@ -42,30 +42,77 @@ assert.match(O.validateCheckout({ ...base, customer: { ...customer, area: "" } }
 assert.match(O.validateCheckout({ lines: [], totals, customer }, CONFIG), /empty/);
 assert.match(O.validateCheckout({ lines, totals: { ...totals, subtotal: 10 }, customer }, CONFIG), /Minimum/);
 
-// Apps Script mock
-const rows = [];
-const prodRows = FALLBACK_PRODUCTS.map((s) => [s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]);
-prodRows[0][2] = false; // first item sold out
-const sheet = (name) => name === "Products"
-  ? { getLastRow: () => prodRows.length + 1, getRange: () => ({ getValues: () => prodRows }) }
-  : { getLastRow: () => rows.length + 1, getRange: () => ({ getValues: () => rows.map((r) => [r[1]]) }), appendRow: (r) => rows.push(r) };
+// Apps Script mock (in-memory sheets)
+class Sheet {
+  constructor(rows) { this.rows = rows; }
+  getLastRow() { return this.rows.length; }
+  getRange(r, c, nr = 1, nc = 1) {
+    const me = this;
+    return {
+      getValues: () => me.rows.slice(r - 1, r - 1 + nr).map((row) => row.slice(c - 1, c - 1 + nc)),
+      setValues: (v) => v.forEach((row, i) => { me.rows[r - 1 + i] = me.rows[r - 1 + i] || []; row.forEach((x, j) => { me.rows[r - 1 + i][c - 1 + j] = x; }); }),
+      setValue: (x) => { me.rows[r - 1][c - 1] = x; },
+      insertCheckboxes() {},
+    };
+  }
+  appendRow(row) { this.rows.push(row); }
+  deleteRow(n) { this.rows.splice(n - 1, 1); }
+}
+const prodSheet = new Sheet([["ID"], ...FALLBACK_PRODUCTS.map((s) => [s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""])]);
+const ordSheet = new Sheet([["Time"]]);
+const sheets = { Products: prodSheet, Orders: ordSheet };
 const ctx = {
-  SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: sheet }) },
+  SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: (n) => sheets[n] }) },
   LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+  Utilities: { sleep() {} },
   ContentService: { MimeType: { JSON: "json" }, createTextOutput: (t) => ({ t, setMimeType() { return this; } }) },
-  JSON, String, Number, Math, Date,
+  JSON, String, Number, Math, Date, Error, Array,
 };
 vm.createContext(ctx);
-vm.runInContext(readFileSync(new URL("../google-apps-script/Code.gs", import.meta.url), "utf8"), ctx);
+const code = readFileSync(new URL("../google-apps-script/Code.gs", import.meta.url), "utf8");
+vm.runInContext(code, ctx);
 const post = (o) => JSON.parse(vm.runInContext("doPost", ctx)({ postData: { contents: JSON.stringify(o) } }).t);
-const get = JSON.parse(vm.runInContext("doGet", ctx)().t);
-assert.equal(get.products.length, 30); assert.equal(get.products[0].available, false);
-const ok = { orderId: "F2F-1", name: "=HYPERLINK(1)", phone: "9014346193", address: "x", area: "y", items: [{ id: "potato", qty: 1.5 }, { id: "fake", qty: 1 }, { id: FALLBACK_PRODUCTS[0].id, qty: 1 }] };
-assert.equal(post(ok).ok, true); assert.equal(rows.length, 1);
-assert.equal(rows[0][2][0], "'"); // formula neutralised
-assert.equal(rows[0][9].split("\n").length, 1); // only valid potato line
-assert.equal(post(ok).dup, true); assert.equal(rows.length, 1);
+const getP = () => JSON.parse(vm.runInContext("doGet", ctx)().t).products;
+const orders = () => ordSheet.rows.slice(1);
+
+assert.equal(getP().length, 30);
+prodSheet.rows[1][2] = false;                       // untick "In stock" -> hidden
+assert.equal(getP().length, 29); assert.ok(!getP().find((p) => p.id === FALLBACK_PRODUCTS[0].id));
+prodSheet.rows[1][2] = true; prodSheet.rows[2][1] = false; // untick "Show" -> hidden
+assert.equal(getP().length, 29); prodSheet.rows[2][1] = true;
+
+const ok = { orderId: "F2F-1", name: "=HYPERLINK(1)", phone: "9014346193", address: "x", area: "y", items: [{ id: "potato", qty: 1.5 }, { id: "fake", qty: 1 }] };
+assert.equal(post(ok).ok, true); assert.equal(orders().length, 1);
+assert.equal(orders()[0][2][0], "'");               // formula neutralised
+assert.equal(orders()[0][9].split("\n").length, 1);
+assert.equal(post(ok).dup, true); assert.equal(orders().length, 1);
 assert.equal(post({ ...ok, orderId: "F2", phone: "123" }).ok, false);
-assert.equal(post({ ...ok, orderId: "F3", website: "spam" }).ok, true); assert.equal(rows.length, 1);
+assert.equal(post({ ...ok, orderId: "F3", website: "spam" }).ok, true); assert.equal(orders().length, 1);
 assert.equal(post({ ...ok, orderId: "F4", items: [{ id: "fake", qty: 1 }] }).ok, false);
+post({ ...ok, orderId: "F5" }); assert.equal(orders().length, 2);
+
+// admin: password rules (default password refuses; set one for the test)
+assert.match(post({ action: "list", pw: "x" }).error, /change ADMIN_PASSWORD/);
+vm.runInContext('ADMIN_PASSWORD = "secret123"', ctx);
+assert.equal(post({ action: "list", pw: "nope" }).error, "Wrong password");
+const L = post({ action: "list", pw: "secret123" });
+assert.equal(L.ok, true); assert.equal(L.products.length, 30); assert.equal(L.orders.length, 2);
+assert.equal(L.orders[0].orderId, "F2F-5".replace("F2F-", "F")); // newest first
+assert.equal(L.orders[0].status, "New");
+let r = post({ action: "setStatus", pw: "secret123", orderId: "F5", status: "Delivered" });
+assert.equal(r.orders[0].status, "Delivered");
+assert.equal(post({ action: "setStatus", pw: "secret123", orderId: "F5", status: "bogus" }).ok, false);
+// edit price + hide
+const potato = L.products.find((p) => p.id === "potato");
+r = post({ action: "saveProducts", pw: "secret123", products: [{ ...potato, price: 55, show: false }] });
+assert.equal(r.products.find((p) => p.id === "potato").price, 55);
+assert.ok(!getP().find((p) => p.id === "potato"));            // hidden from public site
+r = post({ action: "saveProducts", pw: "secret123", products: [{ ...potato, price: 55, show: true }] });
+assert.equal(getP().find((p) => p.id === "potato").price, 55);
+// add new + delete
+r = post({ action: "saveProducts", pw: "secret123", products: [{ id: "drumstick-123", name: "Drumstick", te: "మునగకాయ", hi: "सहजन", category: "Gourds", price: 80, unit: "kg", show: true }] });
+assert.equal(getP().length, 31); assert.equal(r.products.length, 31);
+assert.equal(post({ action: "saveProducts", pw: "secret123", products: [{ id: "bad", name: "Bad", price: 0, show: true }] }).ok, false);
+r = post({ action: "deleteProduct", pw: "secret123", id: "drumstick-123" });
+assert.equal(getP().length, 30);
 console.log("all logic tests passed");

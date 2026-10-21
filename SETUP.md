@@ -45,3 +45,6 @@ Deploy > Manage deployments > pencil > Version: New version > Deploy (the URL st
   and you can phone-confirm odd orders before delivering.
 - Old Supabase accounts and data are not carried over.
 - Keep recovery-codes.txt out of Git (it is in .gitignore).
+
+## Admin page
+Open your-site/admin. Before first use, change ADMIN_PASSWORD at the top of Code.gs, then Deploy > Manage deployments > pencil > New version > Deploy.
