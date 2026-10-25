@@ -7,7 +7,6 @@ Customers pick vegetables, the order is typed out as a WhatsApp message, and Wha
 
 Live site: https://field-to-family.vercel.app (or your new Vercel link)
 
-
 ---
 
 ## How it works
@@ -47,7 +46,11 @@ so you always have a record.
 ## Project structure
 
 ```
-pages/index.js               The whole ordering page
+pages/index.js               The ordering page
+pages/admin.js               Admin page (orders, prices, vegetables)
+components/VegArt.js         Vegetable illustrations
+components/Scenes.js         Farm, store and delivery drawings
+components/Gallery.js        Farm and store section (photos or drawings)
 pages/_app.js, _document.js  Page title, fonts, favicon
 styles/globals.css           Design
 lib/config.mjs               Your settings (number, Sheet URL, areas, fees)
@@ -109,6 +112,21 @@ To overwrite an old repo instead of making a new one, use `git push --force orig
 2. Open the basket, fill in the details and tap **Send order on WhatsApp**.
 3. Check that WhatsApp opens with the message ready for 9014346193.
 4. Check that a new row appeared in the **Orders** tab.
+
+## Pictures, photos and look
+
+- **Vegetable pictures:** all 30 vegetables have built-in hand-drawn illustrations (free, nothing to download). New vegetables you add
+  with a similar name (for example "Ash gourd", "Green chilli") get a matching picture automatically, otherwise a leaf badge.
+- **Real vegetable photo:** paste an image link in the Image URL column of the Products sheet. The photo replaces the drawing.
+- **Farm and store photos:** copy your pictures into `public/gallery/` as `farm.jpg`, `store.jpg` and `delivery.jpg`
+  (about 1200 px wide, under 300 KB). They replace the drawings in the "Our farm & store" section automatically.
+  Edit the titles and text in `lib/config.mjs` under `gallery`.
+- **Popular tags:** edit `popular` in `lib/config.mjs`.
+- **Promises** under the gallery (`promises` in config): keep only what is true for your business.
+- **Order again:** returning customers get a one-tap button to repeat their last order (saved on their own phone).
+- **Share with friends:** the footer button shares your link on WhatsApp. When your link is shared, WhatsApp shows a preview card
+  (`public/og.png`). Make sure `siteUrl` in `lib/config.mjs` is your real website address.
+- **Install on phone:** customers can "Add to Home screen" and the site opens like an app, with its own icon.
 
 ## Admin page (easiest way to run the shop)
 

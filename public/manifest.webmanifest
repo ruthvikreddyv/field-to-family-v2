@@ -1,0 +1,13 @@
+{
+  "name": "Field to Family",
+  "short_name": "Field to Family",
+  "description": "Fresh vegetables delivered in Hyderabad. Order on WhatsApp.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf3e6",
+  "theme_color": "#2f4a34",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

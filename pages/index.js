@@ -1,3 +1,6 @@
+import VegArt from "../components/VegArt";
+import Gallery from "../components/Gallery";
+import { HeroScene } from "../components/Scenes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CONFIG } from "../lib/config.mjs";
 import { FALLBACK_PRODUCTS } from "../lib/catalog.mjs";
@@ -49,6 +52,8 @@ export default function Home() {
   const [order, setOrder] = useState(null);
   const [locating, setLocating] = useState(false);
   const loggedRef = useRef(false);
+  const [last, setLast] = useState(null);
+  const [origin, setOrigin] = useState("");
 
   const [form, setForm] = useState({
     name: "", phone: "", address: "", area: "", slot: CONFIG.deliverySlots[0],
@@ -59,6 +64,8 @@ export default function Home() {
   useEffect(() => {
     setCart(load(CART_KEY, {}));
     setForm((f) => ({ ...f, ...load(FORM_KEY, {}) }));
+    setLast(load("f2f_last_v1", null));
+    setOrigin(window.location.origin);
     setReady(true);
   }, []);
   useEffect(() => { if (ready) save(CART_KEY, cart); }, [cart, ready]);
@@ -166,6 +173,7 @@ export default function Home() {
   function onSendClick() {
     if (!order || loggedRef.current) return;
     loggedRef.current = true;
+    save("f2f_last_v1", Object.fromEntries(order.lines.map((l) => [l.id, l.qty])));
     if (CONFIG.sheetUrl) {
       const payload = {
         orderId: order.orderId,
@@ -201,6 +209,16 @@ export default function Home() {
 
   const inCart = (id) => cart[id] || 0;
 
+  const lastCount = last ? cartLines(last, products).length : 0;
+  function orderAgain() {
+    const ok = {};
+    cartLines(last, products).forEach((l) => { ok[l.id] = l.qty; });
+    setCart(ok);
+    openDrawer();
+  }
+  const shareText = encodeURIComponent(`Fresh vegetables delivered in ${CONFIG.city} - order in a minute on WhatsApp: ${origin || CONFIG.siteUrl}`);
+
+
   return (
     <>
       <header className="top">
@@ -216,15 +234,33 @@ export default function Home() {
 
       <section className="hero">
         <div className="hero-in">
-          <h1>Fresh from the farm to your kitchen.</h1>
-          <p>Pick your vegetables, tap send, and your order reaches us on WhatsApp. Everything listed was harvested for today&apos;s delivery.</p>
-          <div className="facts">
-            <span>Delivering in {CONFIG.city} only</span>
-            <span>Min order ₹{CONFIG.minOrder}</span>
-            <span>Free delivery above ₹{CONFIG.freeDeliveryAbove}</span>
-            <span>Pay on delivery</span>
+          <div className="hero-copy">
+            <h1>Fresh from the farm to your kitchen.</h1>
+            <p>Pick your vegetables, tap send, and your order reaches us on WhatsApp. Everything listed was harvested for today&apos;s delivery.</p>
+            <div className="facts">
+              <span>Delivering in {CONFIG.city} only</span>
+              <span>Min order ₹{CONFIG.minOrder}</span>
+              <span>Free delivery above ₹{CONFIG.freeDeliveryAbove}</span>
+            </div>
+            <a className="hero-cta" href="#veg">Start your order</a>
+          </div>
+          <div className="hero-art" aria-hidden="true">
+            {["tomato", "carrot", "cauliflower", "capsicum", "spinach"].map((id, i) => (
+              <span key={id} className={"float-veg v" + i}><VegArt id={id} name={id} size={74} /></span>
+            ))}
           </div>
         </div>
+        <HeroScene />
+      </section>
+
+      <section className="steps" aria-label="How to order">
+        {[
+          ["1", "Pick", "Choose vegetables and quantity."],
+          ["2", "Check", "Your order is typed out for you."],
+          ["3", "Send", "Tap send in WhatsApp. We confirm and deliver."],
+        ].map(([n, t, d]) => (
+          <div className="step" key={n}><span className="n">{n}</span><div><b>{t}</b><span>{d}</span></div></div>
+        ))}
       </section>
 
       <div className="filters">
@@ -241,7 +277,12 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="list">
+      <main className="list" id="veg">
+        {lastCount > 0 && itemCount === 0 && (
+          <button className="again" onClick={orderAgain}>
+            <b>Order again</b><span>Your last order · {lastCount} item{lastCount > 1 ? "s" : ""}</span>
+          </button>
+        )}
         {visible.length === 0 && <p className="empty">No vegetables match &ldquo;{query}&rdquo;.</p>}
         {visible.map((g) => (
           <section key={g.category}>
@@ -251,10 +292,10 @@ export default function Home() {
               return (
                 <div className={"row" + (p.available ? "" : " off")} key={p.id}>
                   <div className="thumb">
-                    {p.image ? <img src={p.image} alt="" loading="lazy" /> : <span>{p.name.charAt(0)}</span>}
+                    {p.image ? <img src={p.image} alt="" loading="lazy" /> : <VegArt id={p.id} name={p.name} size={60} />}
                   </div>
                   <div className="info">
-                    <div className="nm">{p.name}</div>
+                    <div className="nm">{p.name}{CONFIG.popular && CONFIG.popular.includes(p.id) && <i className="tag">Popular</i>}</div>
                     <div className="native">{p.te}{p.te && p.hi ? " · " : ""}{p.hi}</div>
                     <div className="pr"><b>₹{p.price}</b> / {p.unit}{!p.available && <em> · Out of stock today</em>}</div>
                   </div>
@@ -282,6 +323,12 @@ export default function Home() {
         </p>
       </main>
 
+      <section className="promises">
+        {CONFIG.promises.map((x) => (<div key={x.title}><b>{x.title}</b><span>{x.text}</span></div>))}
+      </section>
+
+      <Gallery items={CONFIG.gallery} />
+
       {itemCount > 0 && !drawer && (
         <button className="float" onClick={openDrawer}>
           View basket · {itemCount} item{itemCount > 1 ? "s" : ""} · ₹{totals.subtotal}
@@ -289,6 +336,7 @@ export default function Home() {
       )}
 
       <footer className="foot">
+        <a className="share" href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noopener noreferrer">Share with friends on WhatsApp</a>
         <div>Field to Family · Hyderabad · WhatsApp {CONFIG.whatsappNumber.replace(/^91/, "+91 ")}</div>
       </footer>
 
