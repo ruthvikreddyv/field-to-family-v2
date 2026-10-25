@@ -14,7 +14,7 @@ var ADMIN_PASSWORD = "change-this-password";
 var PRODUCT_HEADERS = ["ID", "Show on website", "In stock", "Category", "Name", "Telugu", "Hindi", "Price", "Unit", "Image URL"];
 var ORDER_HEADERS = ["Time", "Order ID", "Name", "Phone", "Address", "Area", "Map link", "Slot", "Payment", "Items", "Total (Rs)", "Notes", "Status"];
 var STATUSES = ["New", "Confirmed", "Out for delivery", "Delivered", "Cancelled"];
-var MIN_ORDER = 150, FREE_ABOVE = 500, DELIVERY_FEE = 30;
+var MIN_ORDER = 150, FREE_ABOVE = 299, DELIVERY_FEE = 30;
 
 var SEED = [
  {
@@ -67,8 +67,44 @@ var SEED = [
   "category": "Leafy greens",
   "name": "Mustard greens",
   "hi": "सरसों",
-  "te": "ఆవిసె కూర",
+  "te": "ఆవాల ఆకులు",
   "price": 30,
+  "unit": "bunch"
+ },
+ {
+  "id": "gongura",
+  "category": "Leafy greens",
+  "name": "Gongura (Sorrel leaves)",
+  "hi": "अंबाड़ी (गोंगूरा)",
+  "te": "గోంగూర",
+  "price": 30,
+  "unit": "bunch"
+ },
+ {
+  "id": "springonion",
+  "category": "Leafy greens",
+  "name": "Spring onion",
+  "hi": "हरा प्याज़",
+  "te": "ఉల్లికాడలు",
+  "price": 30,
+  "unit": "bunch"
+ },
+ {
+  "id": "curryleaves",
+  "category": "Leafy greens",
+  "name": "Curry leaves",
+  "hi": "कढ़ी पत्ता",
+  "te": "కరివేపాకు",
+  "price": 10,
+  "unit": "bunch"
+ },
+ {
+  "id": "drumstickleaves",
+  "category": "Leafy greens",
+  "name": "Drumstick leaves",
+  "hi": "सहजन के पत्ते",
+  "te": "మునగాకు",
+  "price": 25,
   "unit": "bunch"
  },
  {
@@ -144,6 +180,33 @@ var SEED = [
   "unit": "250g"
  },
  {
+  "id": "yam",
+  "category": "Roots & tubers",
+  "name": "Elephant foot yam",
+  "hi": "जिमीकंद (सूरन)",
+  "te": "కందగడ్డ",
+  "price": 60,
+  "unit": "kg"
+ },
+ {
+  "id": "colocasia",
+  "category": "Roots & tubers",
+  "name": "Colocasia (Arbi)",
+  "hi": "अरबी",
+  "te": "చామగడ్డ",
+  "price": 60,
+  "unit": "kg"
+ },
+ {
+  "id": "turnip",
+  "category": "Roots & tubers",
+  "name": "Turnip",
+  "hi": "शलगम",
+  "te": "టర్నిప్",
+  "price": 40,
+  "unit": "kg"
+ },
+ {
   "id": "bottlegourd",
   "category": "Gourds & squashes",
   "name": "Bottle gourd",
@@ -198,6 +261,24 @@ var SEED = [
   "unit": "kg"
  },
  {
+  "id": "ashgourd",
+  "category": "Gourds & squashes",
+  "name": "Ash gourd",
+  "hi": "पेठा",
+  "te": "బూడిద గుమ్మడికాయ",
+  "price": 35,
+  "unit": "kg"
+ },
+ {
+  "id": "ivygourd",
+  "category": "Gourds & squashes",
+  "name": "Ivy gourd (Tindora)",
+  "hi": "कुंदरू",
+  "te": "దొండకాయ",
+  "price": 50,
+  "unit": "kg"
+ },
+ {
   "id": "tomato",
   "category": "Everyday vegetables",
   "name": "Tomato",
@@ -238,7 +319,7 @@ var SEED = [
   "category": "Everyday vegetables",
   "name": "Green beans",
   "hi": "फंसी",
-  "te": "చిక్కుడుకాయ",
+  "te": "బీన్స్",
   "price": 50,
   "unit": "kg"
  },
@@ -286,6 +367,267 @@ var SEED = [
   "te": "మునగకాయ",
   "price": 50,
   "unit": "bunch"
+ },
+ {
+  "id": "clusterbeans",
+  "category": "Everyday vegetables",
+  "name": "Cluster beans",
+  "hi": "ग्वार फली",
+  "te": "గోరుచిక్కుడు",
+  "price": 60,
+  "unit": "kg"
+ },
+ {
+  "id": "broadbeans",
+  "category": "Everyday vegetables",
+  "name": "Broad beans",
+  "hi": "सेम फली",
+  "te": "చిక్కుడుకాయ",
+  "price": 70,
+  "unit": "kg"
+ },
+ {
+  "id": "rawbanana",
+  "category": "Everyday vegetables",
+  "name": "Raw banana",
+  "hi": "कच्चा केला",
+  "te": "అరటికాయ",
+  "price": 40,
+  "unit": "kg"
+ },
+ {
+  "id": "rawmango",
+  "category": "Everyday vegetables",
+  "name": "Raw mango",
+  "hi": "कच्चा आम",
+  "te": "మామిడికాయ",
+  "price": 60,
+  "unit": "kg"
+ },
+ {
+  "id": "rawpapaya",
+  "category": "Everyday vegetables",
+  "name": "Raw papaya",
+  "hi": "कच्चा पपीता",
+  "te": "బొప్పాయికాయ",
+  "price": 35,
+  "unit": "kg"
+ },
+ {
+  "id": "lemon",
+  "category": "Everyday vegetables",
+  "name": "Lemon",
+  "hi": "नींबू",
+  "te": "నిమ్మకాయ",
+  "price": 30,
+  "unit": "250g"
+ },
+ {
+  "id": "sweetcorn",
+  "category": "Everyday vegetables",
+  "name": "Sweet corn",
+  "hi": "भुट्टा",
+  "te": "మొక్కజొన్న",
+  "price": 20,
+  "unit": "piece"
+ },
+ {
+  "id": "bananaflower",
+  "category": "Everyday vegetables",
+  "name": "Banana flower",
+  "hi": "केले का फूल",
+  "te": "అరటి పువ్వు",
+  "price": 30,
+  "unit": "piece"
+ },
+ {
+  "id": "broccoli",
+  "category": "Exotic & salad",
+  "name": "Broccoli",
+  "hi": "ब्रोकली",
+  "te": "బ్రోకలీ",
+  "price": 80,
+  "unit": "piece"
+ },
+ {
+  "id": "babycorn",
+  "category": "Exotic & salad",
+  "name": "Baby corn",
+  "hi": "बेबी कॉर्न",
+  "te": "బేబీ కార్న్",
+  "price": 40,
+  "unit": "packet"
+ },
+ {
+  "id": "mushroom",
+  "category": "Exotic & salad",
+  "name": "Button mushroom",
+  "hi": "मशरूम",
+  "te": "పుట్టగొడుగులు",
+  "price": 60,
+  "unit": "packet"
+ },
+ {
+  "id": "redcabbage",
+  "category": "Exotic & salad",
+  "name": "Red cabbage",
+  "hi": "लाल पत्ता गोभी",
+  "te": "ఎర్ర క్యాబేజీ",
+  "price": 50,
+  "unit": "piece"
+ },
+ {
+  "id": "zucchini",
+  "category": "Exotic & salad",
+  "name": "Zucchini",
+  "hi": "ज़ुकीनी",
+  "te": "జుకినీ",
+  "price": 80,
+  "unit": "kg"
+ },
+ {
+  "id": "colourcapsicum",
+  "category": "Exotic & salad",
+  "name": "Red & yellow capsicum",
+  "hi": "लाल-पीली शिमला मिर्च",
+  "te": "రంగుల క్యాప్సికం",
+  "price": 120,
+  "unit": "kg"
+ },
+ {
+  "id": "cherrytomato",
+  "category": "Exotic & salad",
+  "name": "Cherry tomato",
+  "hi": "चेरी टमाटर",
+  "te": "చెర్రీ టమాటా",
+  "price": 50,
+  "unit": "packet"
+ },
+ {
+  "id": "chickencurry",
+  "category": "Chicken",
+  "name": "Chicken curry cut (with skin)",
+  "hi": "चिकन करी कट",
+  "te": "చికెన్ కర్రీ కట్",
+  "price": 240,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenskinless",
+  "category": "Chicken",
+  "name": "Skinless chicken curry cut",
+  "hi": "स्किनलेस चिकन",
+  "te": "స్కిన్‌లెస్ చికెన్",
+  "price": 270,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenboneless",
+  "category": "Chicken",
+  "name": "Boneless chicken",
+  "hi": "बोनलेस चिकन",
+  "te": "బోన్‌లెస్ చికెన్",
+  "price": 380,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenlegs",
+  "category": "Chicken",
+  "name": "Chicken leg pieces",
+  "hi": "चिकन लेग",
+  "te": "చికెన్ లెగ్స్",
+  "price": 280,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenwings",
+  "category": "Chicken",
+  "name": "Chicken wings",
+  "hi": "चिकन विंग्स",
+  "te": "చికెన్ వింగ్స్",
+  "price": 220,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenkeema",
+  "category": "Chicken",
+  "name": "Chicken mince (keema)",
+  "hi": "चिकन कीमा",
+  "te": "చికెన్ కైమా",
+  "price": 340,
+  "unit": "kg"
+ },
+ {
+  "id": "chickenliver",
+  "category": "Chicken",
+  "name": "Chicken liver",
+  "hi": "चिकन कलेजी",
+  "te": "చికెన్ లివర్",
+  "price": 200,
+  "unit": "kg"
+ },
+ {
+  "id": "countrychicken",
+  "category": "Chicken",
+  "name": "Country chicken (Nati kodi)",
+  "hi": "देसी मुर्गा",
+  "te": "నాటు కోడి",
+  "price": 550,
+  "unit": "kg"
+ },
+ {
+  "id": "muttoncurry",
+  "category": "Mutton",
+  "name": "Mutton curry cut (goat)",
+  "hi": "मटन करी कट",
+  "te": "మటన్ కర్రీ కట్",
+  "price": 900,
+  "unit": "kg"
+ },
+ {
+  "id": "muttonboneless",
+  "category": "Mutton",
+  "name": "Boneless mutton",
+  "hi": "बोनलेस मटन",
+  "te": "బోన్‌లెస్ మటన్",
+  "price": 1100,
+  "unit": "kg"
+ },
+ {
+  "id": "muttonkeema",
+  "category": "Mutton",
+  "name": "Mutton mince (keema)",
+  "hi": "मटन कीमा",
+  "te": "మటన్ కైమా",
+  "price": 950,
+  "unit": "kg"
+ },
+ {
+  "id": "muttonribs",
+  "category": "Mutton",
+  "name": "Mutton ribs",
+  "hi": "मटन रिब्स",
+  "te": "మటన్ రిబ్స్",
+  "price": 850,
+  "unit": "kg"
+ },
+ {
+  "id": "muttonliver",
+  "category": "Mutton",
+  "name": "Mutton liver",
+  "hi": "मटन कलेजी",
+  "te": "మటన్ లివర్",
+  "price": 800,
+  "unit": "kg"
+ },
+ {
+  "id": "muttonpaya",
+  "category": "Mutton",
+  "name": "Paya (trotters)",
+  "hi": "पाया",
+  "te": "పాయా",
+  "price": 350,
+  "unit": "kg"
  }
 ];
 
@@ -312,6 +654,25 @@ function setupSheets() {
   }
   var def = ss.getSheetByName("Sheet1");
   if (def && ss.getSheets().length > 1 && def.getLastRow() === 0) ss.deleteSheet(def);
+}
+
+/* Run this once after updating Code.gs: adds any new default items (e.g. chicken, mutton, more vegetables)
+   that are not yet in your Products tab. It never changes items you already have. */
+function addMissingProducts() {
+  var sh = ss_().getSheetByName("Products");
+  if (!sh) { setupSheets(); return; }
+  var last = sh.getLastRow();
+  var have = {};
+  if (last > 1) sh.getRange(2, 1, last - 1, 1).getValues().forEach(function (r) { have[String(r[0]).trim()] = true; });
+  var added = 0;
+  SEED.forEach(function (s) {
+    if (have[s.id]) return;
+    var at = sh.getLastRow() + 1;
+    sh.getRange(at, 1, 1, PRODUCT_HEADERS.length).setValues([[s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]]);
+    sh.getRange(at, 2, 1, 2).insertCheckboxes();
+    added++;
+  });
+  return added;
 }
 
 function truthy(v) { return v === true || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "yes"; }

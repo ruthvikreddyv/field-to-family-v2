@@ -211,6 +211,297 @@ const ART = {
       <path d="M8 40 L40 8" stroke="#9aaa58" strokeWidth="3.6" strokeLinecap="round" />
       <g fill="#6b7a34"><circle cx="22" cy="42" r="1.6" /><circle cx="34" cy="30" r="1.6" /><circle cx="46" cy="18" r="1.6" /><circle cx="30" cy="48" r="1.5" /><circle cx="46" cy="38" r="1.5" /></g>
     </g>),
+  /* ---------- more vegetables ---------- */
+  gongura: () => <Bunch leaf="#6ab04c" dark="#4a8f3a" vein="#e0556a" n={5} rx={9} ry={14} accent="#d2475f" />,
+  drumstickleaves: () => <Bunch leaf="#7fbf55" dark="#5ea040" vein="#e6f5cc" n={7} rx={4} ry={15} ruffle />,
+  springonion: () => (
+    <g><Ground />
+      {[-12, -4, 4, 12].map((x, i) => (
+        <g key={i} transform={`rotate(${x} 32 56)`}>
+          <path d={`M30 56 C29 40 29 24 ${30 + i} 6 L${33 + i} 6 C34 24 34 40 34 56Z`} fill={i % 2 ? "#5fa84a" : "#4a9a3e"} />
+          <path d="M28 56 C27 52 28 48 30 46 L34 46 C36 48 37 52 36 56Z" fill="#f4f0e6" />
+        </g>
+      ))}
+      <path d="M26 58 L24 62 M32 58 V62 M38 58 L40 62" stroke="#e7d7b3" strokeWidth="1.4" />
+    </g>),
+  curryleaves: () => (
+    <g><Ground />
+      <path d="M32 58 C30 40 34 24 30 6" stroke="#4f7d3a" strokeWidth="2" fill="none" />
+      {[[26, 50, -30], [38, 46, 30], [25, 38, -35], [39, 34, 35], [26, 26, -35], [38, 22, 35], [28, 14, -30], [36, 10, 30]].map(([x, y, r], i) => (
+        <ellipse key={i} cx={x} cy={y} rx="7" ry="3.4" fill={i % 2 ? "#3f8a3f" : "#2f6f33"} transform={`rotate(${r} ${x} ${y})`} />
+      ))}
+    </g>),
+  yam: () => (
+    <g><Ground />
+      <path d="M8 38 C6 24 20 14 34 16 C50 18 58 30 54 42 C50 54 20 56 12 48 C9 46 8 42 8 38Z" fill="#9a7452" />
+      <path d="M14 46 C24 54 44 54 52 42 C50 50 30 56 14 46Z" fill="#7a5a3c" opacity=".6" />
+      <path d="M22 24 C30 20 40 20 46 26" stroke="#c9a77c" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <g fill="#6d4f33"><circle cx="20" cy="36" r="1.6" /><circle cx="30" cy="42" r="1.6" /><circle cx="42" cy="36" r="1.6" /><circle cx="34" cy="30" r="1.4" /></g>
+    </g>),
+  colocasia: () => (
+    <g><Ground />
+      {[[22, 38, 11, 14, "#7b5a3e"], [42, 38, 11, 14, "#6e5037"], [32, 28, 12, 15, "#86654a"]].map(([x, y, rx, ry, c], i) => (
+        <g key={i}><ellipse cx={x} cy={y + (i === 2 ? 0 : 8)} rx={rx} ry={ry} fill={c} />
+          <path d={`M${x - rx + 3} ${y + 6} H${x + rx - 3} M${x - rx + 4} ${y + 12} H${x + rx - 4}`} stroke="#4f3826" strokeWidth="1" opacity=".5" />
+          <path d={`M${x} ${y - ry + 8} l0 -4`} stroke="#4f3826" strokeWidth="2" /></g>
+      ))}
+    </g>),
+  turnip: () => (
+    <g><Ground />
+      <circle cx="32" cy="38" r="18" fill="#f5f0f4" />
+      <path d="M14 34 C16 22 48 22 50 34 C44 28 20 28 14 34Z" fill="#a8498f" />
+      <ellipse cx="25" cy="40" rx="4" ry="6" fill="#fff" opacity=".5" />
+      <path d="M32 22 C28 14 22 8 18 6 M32 22 C32 12 34 8 36 4 M32 22 C38 14 44 10 48 8" stroke="#4d8a3a" strokeWidth="3.2" strokeLinecap="round" fill="none" />
+      <path d="M32 56 L32 61" stroke="#d9d2dc" strokeWidth="1.6" />
+    </g>),
+  ashgourd: () => (
+    <g><Ground />
+      <ellipse cx="32" cy="36" rx="22" ry="19" fill="#a6c98a" />
+      <ellipse cx="32" cy="36" rx="22" ry="19" fill="#f4f7ee" opacity=".35" />
+      <path d="M32 17 C24 24 24 48 32 55 M32 17 C40 24 40 48 32 55" stroke="#86ab6a" strokeWidth="1.2" fill="none" />
+      <path d="M30 18 C30 12 34 10 36 8 C37 11 35 16 34 18Z" fill="#6a8a3c" />
+      <ellipse cx="22" cy="30" rx="4" ry="6" fill="#fff" opacity=".35" />
+    </g>),
+  ivygourd: () => (
+    <g><Ground />
+      {[[20, 24, -30], [38, 18, 18], [26, 42, 24], [44, 40, -14]].map(([x, y, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} ${y})`}>
+          <ellipse cx={x} cy={y} rx="6" ry="13" fill="#6fb04e" /><path d={`M${x} ${y - 12} V${y + 12}`} stroke="#d9efc4" strokeWidth="1.6" opacity=".8" />
+          <ellipse cx={x - 2} cy={y - 3} rx="1.6" ry="5" fill="#fff" opacity=".25" />
+        </g>
+      ))}
+    </g>),
+  clusterbeans: () => (
+    <g><Ground />
+      {[[-36, 26], [-18, 30], [0, 32], [18, 30], [36, 26]].map(([r, l], i) => (
+        <g key={i} transform={`rotate(${r} 32 56)`}><path d={`M28.6 56 C27 ${56 - l} 30 ${56 - l - 4} 32 ${56 - l - 5} C34 ${56 - l - 4} 37 ${56 - l} 35.4 56Z`} fill={i % 2 ? "#5da64a" : "#4a9040"} /></g>
+      ))}
+      <rect x="26" y="52" width="12" height="5" rx="2" fill="#7a5a34" />
+    </g>),
+  broadbeans: () => (
+    <g><Ground />
+      {[[14, -12], [30, 0], [46, 12]].map(([x, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x + 3} 36)`}>
+          <path d={`M${x} 10 C${x - 6} 24 ${x - 6} 48 ${x + 2} 58 C${x + 12} 54 ${x + 12} 20 ${x + 4} 8Z`} fill={i === 1 ? "#6fb24f" : "#5ea140"} />
+          <g fill="#4a8a35" opacity=".7"><ellipse cx={x + 3} cy="22" rx="3.4" ry="5" /><ellipse cx={x + 3} cy="34" rx="3.4" ry="5" /><ellipse cx={x + 3} cy="46" rx="3" ry="4.6" /></g>
+        </g>
+      ))}
+    </g>),
+  rawbanana: () => (
+    <g><Ground />
+      <path d="M8 22 C14 44 30 54 52 50 C42 46 26 40 18 20Z" fill="#7ab648" />
+      <path d="M16 16 C22 40 36 48 56 42 C46 40 32 34 24 14Z" fill="#8cc656" />
+      <path d="M22 12 C28 34 40 42 58 32 C50 32 38 26 30 10Z" fill="#9ad063" />
+      <path d="M8 22 L14 14 M16 16 L22 8 M22 12 L28 6" stroke="#4f7d3a" strokeWidth="3.4" strokeLinecap="round" />
+    </g>),
+  rawmango: () => (
+    <g><Ground />
+      <path d="M32 12 C48 10 58 26 52 40 C46 54 30 58 22 50 C12 42 12 14 32 12Z" fill="#7fb643" />
+      <path d="M52 40 C46 54 30 58 22 50 C34 52 48 48 52 40Z" fill="#5f9a2c" opacity=".5" />
+      <ellipse cx="22" cy="26" rx="4" ry="8" fill="#fff" opacity=".28" transform="rotate(20 22 26)" />
+      <path d="M32 12 C32 8 34 6 36 5" stroke="#6a4a2a" strokeWidth="2" fill="none" />
+      <path d="M36 8 C42 2 52 4 54 8 C48 12 40 12 36 8Z" fill="#3f8a3f" />
+    </g>),
+  rawpapaya: () => (
+    <g><Ground /><g transform="rotate(-24 32 32)">
+      <path d="M32 4 C48 8 52 34 46 46 C42 56 36 60 32 60 C28 60 22 56 18 46 C12 34 16 8 32 4Z" fill="#78ae4c" />
+      <path d="M32 6 V58 M24 12 C20 28 24 48 30 58 M40 12 C44 28 40 48 34 58" stroke="#9bcf6a" strokeWidth="1.4" fill="none" />
+      <rect x="29" y="2" width="6" height="5" rx="2" fill="#5b7a3a" />
+    </g></g>),
+  lemon: () => (
+    <g><Ground />
+      {[[24, 38, -20], [42, 34, 16]].map(([x, y, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} ${y})`}>
+          <path d={`M${x - 15} ${y} C${x - 15} ${y - 14} ${x + 15} ${y - 14} ${x + 15} ${y} C${x + 15} ${y + 14} ${x - 15} ${y + 14} ${x - 15} ${y}Z`} fill={i ? "#f4d03a" : "#f7dc50"} />
+          <path d={`M${x - 15} ${y} l-3 0 M${x + 15} ${y} l3 0`} stroke="#d9b520" strokeWidth="3" strokeLinecap="round" />
+          <ellipse cx={x - 5} cy={y - 5} rx="5" ry="2.4" fill="#fff" opacity=".4" />
+        </g>
+      ))}
+      <path d="M34 20 C40 12 50 12 52 16 C46 22 38 22 34 20Z" fill="#4d8a3a" />
+    </g>),
+  sweetcorn: () => (
+    <g><Ground /><g transform="rotate(-14 32 32)">
+      <path d="M32 6 C44 8 46 36 42 52 C40 58 24 58 22 52 C18 36 20 8 32 6Z" fill="#f4c52a" />
+      <g stroke="#d9a516" strokeWidth="1.2"><path d="M24 14 V54 M28 10 V56 M32 8 V58 M36 10 V56 M40 14 V54" /><path d="M22 20 H42 M22 28 H43 M22 36 H43 M22 44 H42" /></g>
+      <path d="M32 60 C16 56 12 32 16 18 C20 38 26 50 32 54Z" fill="#6fae48" />
+      <path d="M32 60 C48 56 52 32 48 18 C44 38 38 50 32 54Z" fill="#5a9a3a" />
+    </g></g>),
+  babycorn: () => (
+    <g><Ground />
+      {[[18, -14], [32, 0], [46, 14]].map(([x, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} 56)`}>
+          <path d={`M${x - 5} 56 C${x - 7} 36 ${x - 4} 18 ${x} 12 C${x + 4} 18 ${x + 7} 36 ${x + 5} 56Z`} fill="#f6e08a" />
+          <g stroke="#d8bd5a" strokeWidth="1"><path d={`M${x - 3} 22 V54 M${x} 14 V56 M${x + 3} 22 V54`} /><path d={`M${x - 5} 28 H${x + 5} M${x - 5} 38 H${x + 5} M${x - 5} 48 H${x + 5}`} /></g>
+          <path d={`M${x} 12 C${x - 3} 6 ${x - 5} 4 ${x - 6} 2`} stroke="#c9a54a" strokeWidth="1.4" fill="none" />
+        </g>
+      ))}
+    </g>),
+  bananaflower: () => (
+    <g><Ground /><g transform="rotate(-16 32 32)">
+      <path d="M32 6 C46 16 50 40 38 58 C34 60 30 60 26 58 C14 40 18 16 32 6Z" fill="#7a1f4d" />
+      <path d="M32 6 C40 18 40 42 32 58 C24 42 24 18 32 6Z" fill="#9b2f63" />
+      <path d="M32 6 C36 22 36 42 32 58" stroke="#c0568a" strokeWidth="1.4" fill="none" />
+      <ellipse cx="24" cy="30" rx="2.6" ry="9" fill="#fff" opacity=".2" />
+    </g></g>),
+  broccoli: () => (
+    <g><Ground />
+      <path d="M26 56 L28 36 H36 L38 56Z" fill="#8cc152" />
+      <g fill="#3f8a3f"><circle cx="20" cy="30" r="10" /><circle cx="32" cy="22" r="12" /><circle cx="44" cy="30" r="10" /><circle cx="32" cy="34" r="9" /></g>
+      <g fill="#58a84c"><circle cx="18" cy="26" r="4" /><circle cx="30" cy="18" r="5" /><circle cx="42" cy="26" r="4" /><circle cx="26" cy="32" r="3.4" /><circle cx="38" cy="32" r="3.4" /></g>
+    </g>),
+  mushroom: () => (
+    <g><Ground />
+      {[[22, 40, 15, 1], [42, 38, 12, 0.85]].map(([x, y, r, k], i) => (
+        <g key={i}>
+          <path d={`M${x - 6 * k} ${y} H${x + 6 * k} L${x + 4 * k} ${y + 18 * k} H${x - 4 * k}Z`} fill="#efe6d8" />
+          <path d={`M${x - r} ${y + 2} C${x - r} ${y - r} ${x + r} ${y - r} ${x + r} ${y + 2}Z`} fill="#f6efe4" stroke="#d9cdb8" strokeWidth="1.2" />
+          <ellipse cx={x - r * 0.4} cy={y - r * 0.45} rx={r * 0.3} ry={r * 0.18} fill="#fff" opacity=".8" />
+        </g>
+      ))}
+    </g>),
+  redcabbage: () => (
+    <g><Ground />
+      <circle cx="32" cy="34" r="22" fill="#8e3a8c" />
+      <path d="M32 12 C22 24 22 44 32 56 M32 12 C42 24 42 44 32 56" stroke="#6c2670" strokeWidth="1.6" fill="none" />
+      <path d="M14 26 C22 28 26 34 28 44 M50 26 C42 28 38 34 36 44 M16 42 C22 38 28 38 32 40 M48 42 C42 38 36 38 32 40" stroke="#c07abe" strokeWidth="1.4" fill="none" />
+      <ellipse cx="22" cy="24" rx="5" ry="3" fill="#fff" opacity=".25" transform="rotate(-30 22 24)" />
+    </g>),
+  zucchini: () => (
+    <g><Ground /><g transform="rotate(-34 32 32)">
+      <path d="M24 8 C24 4 40 4 40 8 L40 52 C40 60 24 60 24 52Z" fill="#2f7a3a" />
+      <path d="M28 10 V54 M33 8 V58 M37 10 V54" stroke="#8cc86a" strokeWidth="1.6" opacity=".6" />
+      <rect x="27" y="2" width="10" height="6" rx="2" fill="#5b7a3a" />
+    </g></g>),
+  colourcapsicum: () => (
+    <g><Ground />
+      {[[22, "#d6291f", "#a81b13"], [42, "#f2c418", "#cf9f0a"]].map(([x, c, d], i) => (
+        <g key={i} transform={`translate(${x - 32} ${i ? 4 : 0}) scale(${0.62}) translate(${i ? 8 : 12} 14)`}>
+          <path d="M32 16 C46 12 54 22 52 36 C50 50 44 56 38 56 C35 56 34 53 32 53 C30 53 29 56 26 56 C20 56 14 50 12 36 C10 22 18 12 32 16Z" fill={c} />
+          <path d="M24 20 C20 30 22 46 26 54 M40 20 C44 30 42 46 38 54" stroke={d} strokeWidth="1.6" fill="none" />
+          <ellipse cx="20" cy="28" rx="3.6" ry="8" fill="#fff" opacity=".28" />
+          <path d="M32 16 C32 10 34 8 38 7" stroke="#2f6a26" strokeWidth="4.4" strokeLinecap="round" fill="none" />
+        </g>
+      ))}
+    </g>),
+  cherrytomato: () => (
+    <g><Ground />
+      <path d="M12 12 C24 6 40 6 52 14" stroke="#4d8a3a" strokeWidth="2.4" fill="none" />
+      {[[16, 30], [30, 38], [44, 30], [24, 48], [38, 50]].map(([x, y], i) => (
+        <g key={i}><path d={`M${x} 14 L${x} ${y - 8}`} stroke="#4d8a3a" strokeWidth="1.4" />
+          <circle cx={x} cy={y} r="9" fill={i % 2 ? "#e0382b" : "#d12f22"} /><ellipse cx={x - 3} cy={y - 3} rx="2.6" ry="1.8" fill="#fff" opacity=".4" />
+          <path d={`M${x - 4} ${y - 8} L${x} ${y - 5} L${x + 4} ${y - 8}`} stroke="#4d8a3a" strokeWidth="2" fill="none" /></g>
+      ))}
+    </g>),
+
+  /* ---------- chicken ---------- */
+  chickenlegs: () => (
+    <g><Ground />
+      {[[22, -24], [42, 20]].map(([x, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} 40)`}>
+          <path d={`M${x - 11} 30 C${x - 11} 14 ${x + 11} 14 ${x + 11} 30 C${x + 11} 40 ${x + 5} 46 ${x + 3} 52 H${x - 3} C${x - 5} 46 ${x - 11} 40 ${x - 11} 30Z`} fill={i ? "#d98a3c" : "#e39a4c"} />
+          <rect x={x - 3} y="50" width="6" height="8" fill="#f4eee0" /><circle cx={x - 3.4} cy="59" r="3" fill="#f4eee0" /><circle cx={x + 3.4} cy="59" r="3" fill="#f4eee0" />
+          <ellipse cx={x - 4} cy="26" rx="3.6" ry="6" fill="#fff" opacity=".26" />
+        </g>
+      ))}
+    </g>),
+  chickencurry: () => (
+    <g><Ground />
+      {[[20, 36, 11, "#efb48f"], [38, 30, 12, "#e9a47c"], [30, 46, 11, "#f2bd9a"], [48, 44, 9, "#e9a47c"], [14, 48, 8, "#f2bd9a"]].map(([x, y, r, c], i) => (
+        <g key={i}><path d={`M${x - r} ${y} C${x - r} ${y - r} ${x + r} ${y - r + 2} ${x + r} ${y} C${x + r} ${y + r - 2} ${x - r + 2} ${y + r} ${x - r} ${y}Z`} fill={c} />
+          <circle cx={x + 1} cy={y} r="2.6" fill="#f7efe2" /></g>
+      ))}
+    </g>),
+  chickenskinless: () => (
+    <g><Ground />
+      {[[20, 36, 11, "#f6c7b3"], [38, 30, 12, "#f1b9a2"], [30, 46, 11, "#f8d2c1"], [48, 44, 9, "#f1b9a2"], [14, 48, 8, "#f8d2c1"]].map(([x, y, r, c], i) => (
+        <g key={i}><path d={`M${x - r} ${y} C${x - r} ${y - r} ${x + r} ${y - r + 2} ${x + r} ${y} C${x + r} ${y + r - 2} ${x - r + 2} ${y + r} ${x - r} ${y}Z`} fill={c} />
+          <circle cx={x + 1} cy={y} r="2.6" fill="#fffaf2" /><ellipse cx={x - 3} cy={y - 4} rx="3.6" ry="1.6" fill="#fff" opacity=".4" /></g>
+      ))}
+    </g>),
+  chickenboneless: () => (
+    <g><Ground />
+      <path d="M8 36 C8 22 30 16 44 22 C58 28 58 44 46 50 C32 58 8 52 8 36Z" fill="#f4bfa6" />
+      <path d="M14 44 C26 52 46 52 54 42 C52 50 34 56 14 44Z" fill="#e0a287" opacity=".6" />
+      <path d="M18 34 C26 30 38 30 46 36" stroke="#fbe3d6" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <path d="M22 42 C28 40 36 40 42 44" stroke="#fbe3d6" strokeWidth="2" strokeLinecap="round" fill="none" />
+    </g>),
+  chickenwings: () => (
+    <g><Ground />
+      {[[20, 36, -18], [44, 34, 22]].map(([x, y, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} ${y})`}>
+          <path d={`M${x - 14} ${y + 14} C${x - 18} ${y - 6} ${x - 6} ${y - 16} ${x + 6} ${y - 14} C${x + 16} ${y - 12} ${x + 16} ${y - 2} ${x + 8} ${y + 2} C${x + 8} ${y + 10} ${x - 4} ${y + 18} ${x - 14} ${y + 14}Z`} fill={i ? "#dd9546" : "#e8a557"} />
+          <circle cx={x + 12} cy={y - 12} r="2.4" fill="#f4eee0" />
+          <ellipse cx={x - 6} cy={y - 4} rx="3" ry="6" fill="#fff" opacity=".25" />
+        </g>
+      ))}
+    </g>),
+  chickenkeema: () => (
+    <g><Ground />
+      <path d="M8 52 C8 30 22 16 34 16 C48 16 58 32 56 52 C46 56 18 56 8 52Z" fill="#eaa088" />
+      <g fill="#d9826a">{[[20, 40], [30, 32], [40, 38], [26, 48], [46, 46], [34, 44], [16, 48], [38, 26], [24, 30]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="2" />)}</g>
+      <g fill="#f8c5b0">{[[22, 36], [34, 38], [42, 32], [30, 26], [28, 50]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" />)}</g>
+    </g>),
+  chickenliver: () => (
+    <g><Ground />
+      <path d="M8 36 C8 22 28 16 40 22 C54 26 58 40 48 48 C38 56 24 54 14 48 C10 44 8 40 8 36Z" fill="#7a2a22" />
+      <path d="M22 24 C26 34 32 40 44 44" stroke="#4f1812" strokeWidth="2" fill="none" />
+      <ellipse cx="22" cy="30" rx="6" ry="3" fill="#fff" opacity=".2" transform="rotate(-18 22 30)" />
+    </g>),
+  countrychicken: () => (
+    <g><Ground />
+      <path d="M12 30 C6 22 8 12 14 8 C14 18 20 22 24 26Z" fill="#8a3a22" /><path d="M10 34 C2 28 2 18 6 12 C8 22 14 28 20 32Z" fill="#b5502a" />
+      <path d="M14 34 C14 22 30 20 42 28 C52 34 50 50 38 54 C26 58 14 48 14 34Z" fill="#c8602c" />
+      <path d="M22 36 C28 30 38 32 42 38" stroke="#e8924a" strokeWidth="2.4" fill="none" />
+      <path d="M38 30 C40 20 44 16 46 14" stroke="#c8602c" strokeWidth="9" strokeLinecap="round" fill="none" />
+      <circle cx="47" cy="12" r="6" fill="#d86a30" /><circle cx="49" cy="11" r="1.3" fill="#2b2013" />
+      <path d="M44 6 C44 2 48 2 48 6 C50 3 53 4 52 8Z" fill="#d12f22" /><path d="M53 12 L60 14 L53 16Z" fill="#f2b03a" />
+      <path d="M26 56 L26 62 M34 56 L34 62" stroke="#e2a03a" strokeWidth="2.4" />
+    </g>),
+
+  /* ---------- mutton ---------- */
+  muttoncurry: () => (
+    <g><Ground />
+      {[[20, 36, 11, "#b5453a"], [38, 30, 12, "#a63b32"], [30, 46, 11, "#c04f43"], [48, 44, 9, "#a63b32"], [14, 48, 8, "#c04f43"]].map(([x, y, r, c], i) => (
+        <g key={i}><path d={`M${x - r} ${y} C${x - r} ${y - r} ${x + r} ${y - r + 2} ${x + r} ${y} C${x + r} ${y + r - 2} ${x - r + 2} ${y + r} ${x - r} ${y}Z`} fill={c} />
+          <circle cx={x + 1} cy={y} r="3" fill="#f7efe2" /><circle cx={x + 1} cy={y} r="1.2" fill="#d9c9b0" /></g>
+      ))}
+    </g>),
+  muttonboneless: () => (
+    <g><Ground />
+      {[[18, 40], [32, 32], [44, 44], [30, 48], [46, 28]].map(([x, y], i) => (
+        <g key={i}><path d={`M${x - 8} ${y - 4} L${x + 6} ${y - 8} L${x + 10} ${y + 4} L${x - 4} ${y + 8}Z`} fill={i % 2 ? "#a63b32" : "#b9473c"} />
+          <path d={`M${x - 8} ${y - 4} L${x + 6} ${y - 8} L${x + 4} ${y - 5} L${x - 6} ${y - 1}Z`} fill="#e9c5b5" opacity=".7" /></g>
+      ))}
+    </g>),
+  muttonkeema: () => (
+    <g><Ground />
+      <path d="M8 52 C8 30 22 16 34 16 C48 16 58 32 56 52 C46 56 18 56 8 52Z" fill="#b5453a" />
+      <g fill="#8f2f27">{[[20, 40], [30, 32], [40, 38], [26, 48], [46, 46], [34, 44], [16, 48], [38, 26], [24, 30]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="2" />)}</g>
+      <g fill="#d2776a">{[[22, 36], [34, 38], [42, 32], [30, 26], [28, 50]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" />)}</g>
+    </g>),
+  muttonribs: () => (
+    <g><Ground />
+      <path d="M8 20 C20 12 44 12 56 20 L56 40 C44 48 20 48 8 40Z" fill="#b5453a" />
+      <path d="M8 20 C20 12 44 12 56 20 L56 26 C44 18 20 18 8 26Z" fill="#e9c5b5" opacity=".75" />
+      {[14, 22, 30, 38, 46].map((x) => <path key={x} d={`M${x} 28 V54`} stroke="#f4eee0" strokeWidth="4.4" strokeLinecap="round" />)}
+      {[14, 22, 30, 38, 46].map((x) => <circle key={x} cx={x} cy="55" r="2.4" fill="#f4eee0" />)}
+    </g>),
+  muttonliver: () => (
+    <g><Ground />
+      <path d="M6 38 C6 20 26 12 40 18 C56 22 60 38 50 46 C40 54 24 54 14 48 C8 44 6 42 6 38Z" fill="#5f1f26" />
+      <path d="M20 22 C24 34 32 42 46 46" stroke="#3a1015" strokeWidth="2" fill="none" />
+      <ellipse cx="20" cy="30" rx="7" ry="3" fill="#fff" opacity=".18" transform="rotate(-18 20 30)" />
+    </g>),
+  muttonpaya: () => (
+    <g><Ground />
+      {[[20, -8], [44, 8]].map(([x, r], i) => (
+        <g key={i} transform={`rotate(${r} ${x} 36)`}>
+          <path d={`M${x - 7} 6 H${x + 7} L${x + 5} 44 H${x - 5}Z`} fill="#d7b99a" />
+          <path d={`M${x - 8} 44 H${x + 8} L${x + 10} 58 H${x + 2} V52 H${x - 2} V58 H${x - 10}Z`} fill="#4a3426" />
+          <ellipse cx={x - 2} cy="22" rx="1.8" ry="9" fill="#fff" opacity=".3" />
+        </g>
+      ))}
+    </g>),
 };
 
 // fallback: a leaf badge when we have no drawing for a new vegetable you add later
@@ -232,7 +523,7 @@ const GUESS = [
   ["chilli", "chilli"], ["chili", "chilli"], ["bean", "beans"], ["pea", "peas"], ["cabbage", "cabbage"], ["cauli", "cauliflower"],
   ["brinjal", "brinjal"], ["eggplant", "brinjal"], ["pepper", "capsicum"], ["capsicum", "capsicum"], ["cucumber", "cucumber"],
   ["pumpkin", "pumpkin"], ["garlic", "garlic"], ["ginger", "ginger"], ["radish", "radish"], ["beet", "beetroot"],
-  ["leaf", "spinach"], ["leaves", "spinach"], ["greens", "spinach"], ["palak", "spinach"], ["okra", "okra"], ["lady", "okra"],
+  ["chicken", "chickencurry"], ["mutton", "muttoncurry"], ["keema", "muttonkeema"], ["mushroom", "mushroom"], ["corn", "sweetcorn"], ["lemon", "lemon"], ["mango", "rawmango"], ["banana", "rawbanana"], ["leaf", "spinach"], ["leaves", "spinach"], ["greens", "spinach"], ["palak", "spinach"], ["okra", "okra"], ["lady", "okra"],
 ];
 
 export function artFor(id, name) {

@@ -14,7 +14,7 @@ var ADMIN_PASSWORD = "change-this-password";
 var PRODUCT_HEADERS = ["ID", "Show on website", "In stock", "Category", "Name", "Telugu", "Hindi", "Price", "Unit", "Image URL"];
 var ORDER_HEADERS = ["Time", "Order ID", "Name", "Phone", "Address", "Area", "Map link", "Slot", "Payment", "Items", "Total (Rs)", "Notes", "Status"];
 var STATUSES = ["New", "Confirmed", "Out for delivery", "Delivered", "Cancelled"];
-var MIN_ORDER = 150, FREE_ABOVE = 500, DELIVERY_FEE = 30;
+var MIN_ORDER = 150, FREE_ABOVE = 299, DELIVERY_FEE = 30;
 
 var SEED = /*SEED*/[];
 
@@ -41,6 +41,25 @@ function setupSheets() {
   }
   var def = ss.getSheetByName("Sheet1");
   if (def && ss.getSheets().length > 1 && def.getLastRow() === 0) ss.deleteSheet(def);
+}
+
+/* Run this once after updating Code.gs: adds any new default items (e.g. chicken, mutton, more vegetables)
+   that are not yet in your Products tab. It never changes items you already have. */
+function addMissingProducts() {
+  var sh = ss_().getSheetByName("Products");
+  if (!sh) { setupSheets(); return; }
+  var last = sh.getLastRow();
+  var have = {};
+  if (last > 1) sh.getRange(2, 1, last - 1, 1).getValues().forEach(function (r) { have[String(r[0]).trim()] = true; });
+  var added = 0;
+  SEED.forEach(function (s) {
+    if (have[s.id]) return;
+    var at = sh.getLastRow() + 1;
+    sh.getRange(at, 1, 1, PRODUCT_HEADERS.length).setValues([[s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]]);
+    sh.getRange(at, 2, 1, 2).insertCheckboxes();
+    added++;
+  });
+  return added;
 }
 
 function truthy(v) { return v === true || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "yes"; }

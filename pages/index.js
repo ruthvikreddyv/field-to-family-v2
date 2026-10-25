@@ -1,5 +1,7 @@
 import VegArt from "../components/VegArt";
 import Gallery from "../components/Gallery";
+import LocationFields from "../components/LocationFields";
+import Fx, { burst } from "../components/Fx";
 import { HeroScene } from "../components/Scenes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CONFIG } from "../lib/config.mjs";
@@ -50,13 +52,14 @@ export default function Home() {
   const [step, setStep] = useState("basket"); // basket | details | review | done
   const [error, setError] = useState("");
   const [order, setOrder] = useState(null);
-  const [locating, setLocating] = useState(false);
   const loggedRef = useRef(false);
   const [last, setLast] = useState(null);
+  const [diet, setDiet] = useState("all"); // all | veg | nonveg
+  const [toast, setToast] = useState("");
   const [origin, setOrigin] = useState("");
 
   const [form, setForm] = useState({
-    name: "", phone: "", address: "", area: "", slot: CONFIG.deliverySlots[0],
+    name: "", phone: "", address: "", pincode: "", area: "", landmark: "", slot: CONFIG.deliverySlots[0],
     payment: CONFIG.paymentOptions[0], notes: "", mapLink: "",
   });
 
@@ -98,11 +101,17 @@ export default function Home() {
   const totals = priceBreakdown(Math.round(subtotal * 100) / 100, CONFIG);
   const itemCount = lines.length;
 
+  const isNonVeg = (p) => /chicken|mutton|meat|fish|egg|prawn/i.test(p.category);
+  const dietProducts = useMemo(
+    () => products.filter((p) => diet === "all" || (diet === "nonveg") === isNonVeg(p)),
+    [products, diet]
+  );
+
   const categories = useMemo(() => {
     const seen = [];
-    products.forEach((p) => { if (!seen.includes(p.category)) seen.push(p.category); });
+    dietProducts.forEach((p) => { if (!seen.includes(p.category)) seen.push(p.category); });
     return seen;
-  }, [products]);
+  }, [dietProducts]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -110,13 +119,13 @@ export default function Home() {
       .filter((c) => activeCat === "All" || c === activeCat)
       .map((c) => ({
         category: c,
-        items: products.filter(
+        items: dietProducts.filter(
           (p) => p.category === c &&
             (!q || p.name.toLowerCase().includes(q) || p.hi.includes(q) || p.te.includes(q))
         ),
       }))
       .filter((g) => g.items.length);
-  }, [products, categories, activeCat, query]);
+  }, [dietProducts, categories, activeCat, query]);
 
   function setQty(id, qty) {
     setCart((c) => {
@@ -128,6 +137,7 @@ export default function Home() {
   function bump(p, dir) {
     const s = stepFor(p.unit);
     const cur = cart[p.id] || 0;
+    if (cur === 0 && dir > 0) { setToast(`${p.name} added`); }
     setQty(p.id, Math.round((cur + dir * s) * 10) / 10);
   }
 
@@ -153,20 +163,6 @@ export default function Home() {
     setStep("review");
   }
 
-  function useMyLocation() {
-    if (!("geolocation" in navigator)) { setError("Your browser can't share location. Please type your address."); return; }
-    setLocating(true); setError("");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setForm((f) => ({ ...f, mapLink: `https://maps.google.com/?q=${latitude.toFixed(6)},${longitude.toFixed(6)}` }));
-        setLocating(false);
-      },
-      () => { setLocating(false); setError("Couldn't get your location. Please type your address instead."); },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  }
-
   /* Runs when the customer taps the real WhatsApp link. The link itself
      opens WhatsApp (so it can never be blocked as a pop-up); this just
      also logs the order to the Google Sheet in the background. */
@@ -179,8 +175,8 @@ export default function Home() {
         orderId: order.orderId,
         name: order.customer.name.trim(),
         phone: normalisePhone(order.customer.phone),
-        address: order.customer.address.trim(),
-        area: order.customer.area,
+        address: order.customer.address.trim() + (order.customer.landmark ? " (Landmark: " + order.customer.landmark.trim() + ")" : ""),
+        area: order.customer.area.trim() + " - " + order.customer.pincode,
         mapLink: order.customer.mapLink || "",
         slot: order.customer.slot,
         payment: order.customer.payment,
@@ -207,6 +203,13 @@ export default function Home() {
     setTimeout(() => { setCart({}); setStep("done"); }, 600);
   }
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 1700);
+    return () => clearTimeout(t);
+  }, [toast]);
+  useEffect(() => { setActiveCat("All"); }, [diet]);
+
   const inCart = (id) => cart[id] || 0;
 
   const lastCount = last ? cartLines(last, products).length : 0;
@@ -221,12 +224,14 @@ export default function Home() {
 
   return (
     <>
+      <Fx />
+      <div className={"toast" + (toast ? " show" : "")} role="status" aria-live="polite">{toast}</div>
       <header className="top">
         <div className="top-in">
           <div className="brand">Field to Family <span className="pill">{CONFIG.city}</span></div>
           <button className="basket-btn" onClick={openDrawer} aria-label="Open basket">
             <span>Basket</span>
-            <span className="count">{itemCount}</span>
+            <span className="count" key={itemCount}>{itemCount}</span>
             {itemCount > 0 && <span className="amt">₹{totals.subtotal}</span>}
           </button>
         </div>
@@ -242,7 +247,7 @@ export default function Home() {
               <span>Min order ₹{CONFIG.minOrder}</span>
               <span>Free delivery above ₹{CONFIG.freeDeliveryAbove}</span>
             </div>
-            <a className="hero-cta" href="#veg">Start your order</a>
+            <div className="hero-btns"><a className="hero-cta" href="#veg">Start your order</a><a className="hero-sec" href="#contact">Bulk orders &amp; queries</a></div>
           </div>
           <div className="hero-art" aria-hidden="true">
             {["tomato", "carrot", "cauliflower", "capsicum", "spinach"].map((id, i) => (
@@ -269,6 +274,11 @@ export default function Home() {
             className="search" type="search" value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder="Search vegetables (English / తెలుగు / हिन्दी)" aria-label="Search vegetables"
           />
+          <div className="diet" role="group" aria-label="Filter by type">
+            {[["all", "All"], ["veg", "Vegetarian"], ["nonveg", "Chicken & mutton"]].map(([k, l]) => (
+              <button key={k} className={"dietbtn" + (diet === k ? " on" : "")} onClick={() => setDiet(k)}>{l}</button>
+            ))}
+          </div>
           <div className="cats" role="tablist">
             {["All", ...categories].map((c) => (
               <button key={c} className={"cat" + (activeCat === c ? " on" : "")} onClick={() => setActiveCat(c)}>{c}</button>
@@ -286,7 +296,8 @@ export default function Home() {
         {visible.length === 0 && <p className="empty">No vegetables match &ldquo;{query}&rdquo;.</p>}
         {visible.map((g) => (
           <section key={g.category}>
-            <h2>{g.category}</h2>
+            <h2>{g.category}<small>{g.items.length}</small></h2>
+            {isNonVeg(g.items[0]) && CONFIG.meatNote && <p className="meat-note">{CONFIG.meatNote}</p>}
             {g.items.map((p) => {
               const q = inCart(p.id);
               return (
@@ -295,7 +306,7 @@ export default function Home() {
                     {p.image ? <img src={p.image} alt="" loading="lazy" /> : <VegArt id={p.id} name={p.name} size={60} />}
                   </div>
                   <div className="info">
-                    <div className="nm">{p.name}{CONFIG.popular && CONFIG.popular.includes(p.id) && <i className="tag">Popular</i>}</div>
+                    <div className="nm"><i className={"dot " + (isNonVeg(p) ? "nonveg" : "veg")} title={isNonVeg(p) ? "Non-vegetarian" : "Vegetarian"} />{p.name}{CONFIG.popular && CONFIG.popular.includes(p.id) && <i className="tag">Popular</i>}</div>
                     <div className="native">{p.te}{p.te && p.hi ? " · " : ""}{p.hi}</div>
                     <div className="pr"><b>₹{p.price}</b> / {p.unit}{!p.available && <em> · Out of stock today</em>}</div>
                   </div>
@@ -309,7 +320,7 @@ export default function Home() {
                         <button onClick={() => bump(p, 1)} aria-label={`More ${p.name}`}>+</button>
                       </div>
                     ) : (
-                      <button className="add" onClick={() => bump(p, 1)}>Add</button>
+                      <button className="add" onClick={(e) => { burst(e.clientX, e.clientY); bump(p, 1); }}>Add</button>
                     )}
                   </div>
                 </div>
@@ -329,6 +340,28 @@ export default function Home() {
 
       <Gallery items={CONFIG.gallery} />
 
+      <section className="contact" id="contact">
+        <h2>Questions &amp; bulk orders</h2>
+        <p>Cooking for a function, a restaurant or a big family? Call or WhatsApp us for bulk prices and special requests.</p>
+        <div className="c-grid">
+          {CONFIG.contact.phones.map((n) => {
+            const shown = `+${n.slice(0, 2)} ${n.slice(2, 7)} ${n.slice(7)}`;
+            return (
+              <div className="contact-card" key={n}>
+                <b>{shown}</b>
+                <div>
+                  <a className="c-btn" href={`tel:+${n}`}>Call</a>
+                  <a className="c-btn wa" href={`https://wa.me/${n}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <a className="c-mail" href={`mailto:${CONFIG.contact.email}?subject=Field%20to%20Family%20enquiry`}>
+          <span>Email for customer enquiries</span><b>{CONFIG.contact.email}</b>
+        </a>
+      </section>
+
       {itemCount > 0 && !drawer && (
         <button className="float" onClick={openDrawer}>
           View basket · {itemCount} item{itemCount > 1 ? "s" : ""} · ₹{totals.subtotal}
@@ -337,7 +370,8 @@ export default function Home() {
 
       <footer className="foot">
         <a className="share" href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noopener noreferrer">Share with friends on WhatsApp</a>
-        <div>Field to Family · Hyderabad · WhatsApp {CONFIG.whatsappNumber.replace(/^91/, "+91 ")}</div>
+        <div>Field to Family · Hyderabad · Orders on WhatsApp {CONFIG.whatsappNumber.replace(/^91/, "+91 ")}</div>
+        <div><a className="foot-link" href={`mailto:${CONFIG.contact.email}`}>{CONFIG.contact.email}</a></div>
       </footer>
 
       {/* ---------------- basket / checkout drawer ---------------- */}
@@ -392,15 +426,7 @@ export default function Home() {
                 <textarea rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
                   placeholder="e.g. 302, Green Meadows, Road No. 12" />
               </label>
-              <label>Area
-                <select value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })}>
-                  <option value="">Choose your area</option>
-                  {CONFIG.deliveryAreas.map((a) => <option key={a} value={a}>{a}</option>)}
-                </select>
-              </label>
-              <button type="button" className="ghost" onClick={useMyLocation} disabled={locating}>
-                {locating ? "Finding location…" : form.mapLink ? "Location added ✓ (tap to refresh)" : "Share my current location (optional)"}
-              </button>
+              <LocationFields form={form} setForm={setForm} />
               <fieldset>
                 <legend>Delivery slot</legend>
                 {CONFIG.deliverySlots.map((s) => (

@@ -18,7 +18,7 @@ Sees available vegetables (from your Google Sheet)
       |
 Picks items and quantities  ->  Basket
       |
-Enters name, mobile, address, area, slot, payment
+Enters name, mobile, address, pincode (suggestions), area, slot, payment
       |
 Reviews the auto-typed WhatsApp message
       |
@@ -36,8 +36,8 @@ so you always have a record.
 - Mobile-first warm farm design, with English, Telugu and Hindi names
 - Search and category filters
 - Half-kg steps for kg items, whole units for bunch/piece items
-- Minimum order Rs 150, free delivery above Rs 500, otherwise Rs 30 delivery
-- Delivery in Hyderabad only (area dropdown)
+- Minimum order Rs 150, free delivery above Rs 299, otherwise Rs 30 delivery
+- Delivery in Hyderabad only: customers enter their pincode (suggestions appear as they type, city is set automatically)
 - Optional "use my location" Google Maps link
 - Basket and form details are remembered on the customer's phone
 - The Google Sheet is the price and stock list, so you can edit it from your phone with no redeploy
@@ -53,7 +53,7 @@ components/Scenes.js         Farm, store and delivery drawings
 components/Gallery.js        Farm and store section (photos or drawings)
 pages/_app.js, _document.js  Page title, fonts, favicon
 styles/globals.css           Design
-lib/config.mjs               Your settings (number, Sheet URL, areas, fees)
+lib/config.mjs               Your settings (numbers, email, Sheet URL, fees)
 lib/catalog.mjs              Built-in vegetable list (used if the Sheet is unreachable)
 lib/order.mjs                Totals, message text, validation (unit tested)
 google-apps-script/Code.gs   Paste into Google Apps Script (the Sheet backend)
@@ -83,7 +83,7 @@ SETUP.md                     Short setup guide
 2. Paste the URL into `sheetUrl: ""`, for example `sheetUrl: "https://script.google.com/macros/s/XXXX/exec",`.
 3. Check these while you are there:
    - `whatsappNumber: "919014346193"` (country code 91 plus the number, no + or spaces)
-   - `deliveryAreas`, `deliverySlots`, `paymentOptions`
+   - `contact` (the 3 bulk-order numbers and the enquiry email), `meatNote`, `deliverySlots`, `paymentOptions`
    - `minOrder`, `freeDeliveryAbove`, `deliveryFee`
 
 ### Part C: GitHub (new repo)
@@ -112,6 +112,28 @@ To overwrite an old repo instead of making a new one, use `git push --force orig
 2. Open the basket, fill in the details and tap **Send order on WhatsApp**.
 3. Check that WhatsApp opens with the message ready for 9014346193.
 4. Check that a new row appeared in the **Orders** tab.
+
+## What is new in this version
+
+- Free delivery above Rs 299 (website and Sheet script). Min order Rs 150, delivery fee Rs 30 otherwise.
+- "Questions & bulk orders" section with 3 phone numbers (Call and WhatsApp buttons) and the enquiry email `fieldtofamily2026@gmail.com`.
+  Edit them in `lib/config.mjs` under `contact`. Orders still go to `whatsappNumber`.
+- Bigger Telugu and Hindi text (16 px) everywhere.
+- 68 items: 24 more vegetables (gongura, curry leaves, yam, arbi, cluster beans, raw banana, broccoli, mushroom...) plus
+  8 Chicken and 6 Mutton items, each with its own drawing. Filter: All / Vegetarian / Chicken & mutton. Green and red veg / non-veg marks.
+- Location: pincode box with suggestions as you type (by digits or locality name), city set to Hyderabad automatically,
+  other cities blocked, optional landmark, and "Use my location" which pins Google Maps and tries to fill the pincode and area.
+  The pincode list is in `lib/pincodes.mjs` (approximate, add more any time; any 500001 to 500100 is accepted).
+- Cursor ring and hover effects (mouse only), leaf burst when you tap Add, "added" toast, basket pop, scroll reveal, hero parallax.
+  All switched off for people who prefer reduced motion.
+
+### If you already have a live Google Sheet (do this once)
+1. Apps Script: paste the new `Code.gs`, keep your own `ADMIN_PASSWORD`, save.
+2. Choose the function **addMissingProducts** and click Run. It adds the new vegetables, chicken and mutton to your Products tab
+   and never changes items or prices you already have.
+3. Deploy > Manage deployments > pencil > Version: New version > Deploy.
+4. The Rs 299 free delivery rule is in the script too, so step 3 is needed for the Sheet totals to match.
+5. Set your real prices for the new items. The prices shipped are only starting values. Please also check the Telugu and Hindi names.
 
 ## Pictures, photos and look
 
